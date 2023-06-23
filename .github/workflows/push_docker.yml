@@ -50,8 +50,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            martabal/alpine:latest
-            martabal/alpine:${{ steps.releasetag.outputs.date }}
-            ghcr.io/${{ github.repository_owner }}/alpine:${{ steps.releasetag.outputs.date }}
-            ghcr.io/${{ github.repository_owner }}/alpine:latest
+            martabal/ubuntu:latest
+            martabal/ubuntu:${{ steps.releasetag.outputs.date }}
+            ghcr.io/${{ github.repository_owner }}/ubuntu:${{ steps.releasetag.outputs.date }}
+            ghcr.io/${{ github.repository_owner }}/ubuntu:latest
 

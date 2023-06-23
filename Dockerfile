@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:lunar
 
 LABEL maintainer="martabal"
 
@@ -13,7 +13,7 @@ RUN \
     composer \
     coreutils \
     curl \
-    gcc \
+    git \
     jq \
     libpq-dev \
     nodejs \
@@ -23,8 +23,8 @@ RUN \
     python3 \
     python3-pip \
     rustc \
+    rustfmt \
     libsqlite3-dev && \
-  cargo install rustfmt && \
   echo "**** cleanup ****" && \
   apt-get autoremove -y --purge && \
   apt-get clean && \
