@@ -1,7 +1,17 @@
-name: Build and push Docker image
+name: Build, Push docker images and release
 
 on:
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create release'
+        required: false
+        default: true
+        type: boolean
+      tags:
+        description: 'tag'
+        required: false
+        type: string
   schedule:
     - cron: '0 0 1 * *'
 
@@ -15,12 +25,37 @@ jobs:
         with:
           ref: 'main'
           fetch-depth: 0
+      
+      - name: Get latest tag
+        id: latesttag
+        run: |
+          latestTag=$(git describe --abbrev=0 --tags 2>/dev/null || echo "")
+          echo "latest_tag=$latestTag" >> $GITHUB_ENV
 
       - name: Release tag
         id: releasetag
         run: |
-          now=`date "+%Y.%m"`
-          echo "date=$now" >> $GITHUB_OUTPUT
+          latestTag=${{ env.latest_tag }}
+          currentMonth=$(date "+%-m")
+          if [[ $latestTag =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+              latestMonth=${BASH_REMATCH[2]}
+              releaseNumber=${BASH_REMATCH[3]}
+              echo $latestMonth
+              echo $releaseNumber
+              if [[ $currentMonth == $latestMonth ]]; then
+                  releaseNumber=$((releaseNumber + 1))
+              else
+                  releaseNumber=0
+              fi
+          else
+              releaseNumber=0
+          fi
+          releaseTag=$(date "+%Y.$currentMonth").$releaseNumber
+          if [[ -n "${{ github.event.inputs.tags }}" ]]; then
+              releaseTag="${{ github.event.inputs.tags }}"
+          fi
+          echo $releaseTag
+          echo "release_tag=$releaseTag" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2.1.0
@@ -51,7 +86,26 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             martabal/ubuntu:latest
-            martabal/ubuntu:${{ steps.releasetag.outputs.date }}
-            ghcr.io/${{ github.repository_owner }}/ubuntu:${{ steps.releasetag.outputs.date }}
+            martabal/ubuntu:${{ steps.releasetag.outputs.release_tag }}
             ghcr.io/${{ github.repository_owner }}/ubuntu:latest
-
+            ghcr.io/${{ github.repository_owner }}/ubuntu:${{ steps.releasetag.outputs.release_tag }}
+      
+      - name: Set Git tag
+        if: ${{ github.event.inputs.create_release == 'true' && success() }}  
+        run: |
+          git config --global user.name 'martabal'
+          git config --global user.email '74269598+martabal@users.noreply.github.com'
+          git tag v${{ steps.releasetag.outputs.release_tag }}
+          git push origin v${{ steps.releasetag.outputs.release_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Create Release
+        if: ${{ github.event.inputs.create_release == 'true' && success() }}  
+        run : |
+          curl -H 'Authorization: token '"${{ secrets.GH_TOKEN }}"'' --data '{"tag_name": "v${{ steps.releasetag.outputs.release_tag }}",
+            "target_commitish": "main",
+            "name": "v${{ steps.releasetag.outputs.release_tag }}",
+            "generate_release_notes": true,
+            "draft": false,
+            "prerelease": false}' \
+          https://api.github.com/repos/martabal/docker-baseimage-ubuntu/releases
