@@ -91,7 +91,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/ubuntu:${{ steps.releasetag.outputs.release_tag }}
       
       - name: Set Git tag
-        if: ${{ github.event.inputs.create_release == 'true' && success() }}  
+        if: ${{ ( github.event.inputs.create_release == 'true' || github.event_name == 'schedule')  && success() }}
         run: |
           git config --global user.name 'martabal'
           git config --global user.email '74269598+martabal@users.noreply.github.com'
@@ -100,7 +100,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Create Release
-        if: ${{ github.event.inputs.create_release == 'true' && success() }}  
+        if: ${{ ( github.event.inputs.create_release == 'true' || github.event_name == 'schedule')  && success() }}
         run : |
           curl -H 'Authorization: token '"${{ secrets.GH_TOKEN }}"'' --data '{"tag_name": "v${{ steps.releasetag.outputs.release_tag }}",
             "target_commitish": "main",
