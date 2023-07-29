@@ -25,6 +25,7 @@ RUN \
     openssh-client \
     php-tokenizer \
     python3 \
+    python3-pil \
     python3-pip \
     qemu-user-static \
     rustc \
