@@ -28,6 +28,7 @@ RUN \
     python3 \
     python3-pil \
     python3-pip \
+    python3-poetry \
     qemu-user-static \
     rustc \
     rustfmt \
