@@ -12,6 +12,7 @@ RUN \
     build-essential \
     ca-certificates \
     cargo \
+    chromium-browser \
     composer \
     coreutils \
     curl \
