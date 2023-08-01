@@ -29,7 +29,7 @@ jobs:
       - name: Get latest tag
         id: latesttag
         run: |
-          latestTag=$(git describe --abbrev=0 --tags 2>/dev/null || echo "")
+          latestTag=$(curl -sL https://api.github.com/repos/martabal/docker-baseimage-ubuntu/releases/latest | jq -r '.tag_name');
           echo "latest_tag=$latestTag" >> $GITHUB_ENV
 
       - name: Release tag
@@ -109,3 +109,31 @@ jobs:
             "draft": false,
             "prerelease": false}' \
           https://api.github.com/repos/martabal/docker-baseimage-ubuntu/releases
+
+  update_package:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: 'main'
+          fetch-depth: 0
+ 
+      - name: Get latest package versions
+        run: | 
+          TEMPDIR=$(mktemp -d)
+          touch ${TEMPDIR}/package_versions.txt
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -v ${TEMPDIR}:/tmp \
+            ghcr.io/anchore/syft:latest \
+            ghcr.io/martabal/ubuntu:latest -o table=/tmp/package_versions.txt
+          if ! diff ${TEMPDIR}/package_versions.txt package_versions.txt >/dev/null ; then
+            cp ${TEMPDIR}/package_versions.txt ./package_versions.txt
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add .
+            git commit -m 'Bot Updating Package Versions'
+            git push
+          fi
