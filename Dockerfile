@@ -20,20 +20,20 @@ RUN \
     gnupg \
     jq \
     libpq-dev \
+    libsqlite3-dev \
+    libvips \
     lsb-release \
     nodejs \
     npm \
     openssh-client \
     php-tokenizer \
     python3 \
-    python3-pil \
     python3-pip \
     python3-poetry \
     qemu-user-static \
     rustc \
     rustfmt \
-    software-properties-common \
-    libsqlite3-dev && \
+    software-properties-common && \
   mkdir -p /etc/apt/keyrings && \
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
   chmod a+r /etc/apt/keyrings/docker.gpg && \
