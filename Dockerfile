@@ -23,8 +23,6 @@ RUN \
     libsqlite3-dev \
     libvips \
     lsb-release \
-    nodejs \
-    npm \
     openssh-client \
     php-tokenizer \
     python3 \
@@ -34,15 +32,16 @@ RUN \
     rustc \
     rustfmt \
     software-properties-common && \
-  mkdir -p /etc/apt/keyrings && \
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
-  chmod a+r /etc/apt/keyrings/docker.gpg && \
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+  echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x jammy main" >>/etc/apt/sources.list.d/node.list && \
+  curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | tee /usr/share/keyrings/nodesource.gpg >/dev/null && \
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor | tee /usr/share/keyrings/docker.gpg >/dev/null && \
   apt-get update && \
   apt-get install --no-install-recommends -y \
     docker-ce \
     docker-ce-cli \
-    docker-buildx-plugin && \
+    docker-buildx-plugin \
+    nodejs  && \
   echo "**** cleanup ****" && \
   apt-get autoremove -y --purge && \
   apt-get clean && \
