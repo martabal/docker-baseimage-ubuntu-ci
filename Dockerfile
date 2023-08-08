@@ -32,6 +32,7 @@ RUN \
     libgdk-pixbuf2.0-0 \
     libgtk-3-0 \
     libicu-dev \
+    libimage-exiftool-perl \
     libjpeg-dev \
     libnspr4 \
     libnss3 \
