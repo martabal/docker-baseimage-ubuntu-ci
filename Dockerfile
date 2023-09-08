@@ -16,12 +16,11 @@ RUN \
     composer \
     coreutils \
     curl \
+    fonts-liberation \
+    gconf-service \
     git \
     gnupg \
     jq \
-    libpq-dev \
-    fonts-liberation \
-    gconf-service \
     libappindicator1 \
     libasound2 \
     libatk1.0-0 \
@@ -39,6 +38,8 @@ RUN \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
     libpng-dev \
+    libpq-dev \
+    libsqlite3-dev \
     libx11-6 \
     libx11-xcb1 \
     libxcb1 \
@@ -52,8 +53,6 @@ RUN \
     libxrender1 \
     libxss1 \
     libxtst6 \
-    xdg-utils\
-    libsqlite3-dev \
     libvips \
     lsb-release \
     openssh-client \
@@ -64,7 +63,8 @@ RUN \
     qemu-user-static \
     rustc \
     rustfmt \
-    software-properties-common && \
+    software-properties-common \
+    xdg-utils  && \
   echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x lunar main" >>/etc/apt/sources.list.d/node.list && \
   curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | tee /usr/share/keyrings/nodesource.gpg >/dev/null && \
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
