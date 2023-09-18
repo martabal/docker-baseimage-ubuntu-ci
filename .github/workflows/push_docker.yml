@@ -4,28 +4,28 @@ on:
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Create release'
+        description: "Create release"
         required: false
         default: true
         type: boolean
       tags:
-        description: 'tag'
+        description: "tag"
         required: false
         type: string
   schedule:
-    - cron: '0 0 1 * *'
-
+    - cron: "0 0 1 * *"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: 'main'
+          ref: "main"
           fetch-depth: 0
-      
+
       - name: Get latest tag
         id: latesttag
         run: |
@@ -98,7 +98,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
+
       - name: Set Git tag
         if: ${{ ( github.event.inputs.create_release == 'true' || github.event_name == 'schedule')  && success() }}
         run: |
@@ -110,27 +110,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Create Release
         if: ${{ ( github.event.inputs.create_release == 'true' || github.event_name == 'schedule')  && success() }}
-        run : |
+        run: |
           curl -H 'Authorization: token '"${{ secrets.GH_TOKEN }}"'' --data '{"tag_name": "v${{ steps.releasetag.outputs.release_tag }}",
             "target_commitish": "main",
             "name": "v${{ steps.releasetag.outputs.release_tag }}",
             "generate_release_notes": true,
             "draft": false,
             "prerelease": false}' \
-          https://api.github.com/repos/martabal/docker-baseimage-ubuntu/releases
+          https://api.github.com/repos/${{ github.repository_owner }}/${{ github.repository }}/releases
 
   update_package:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ github.event_name != 'pull_request' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: 'main'
+          ref: "main"
           fetch-depth: 0
- 
+
       - name: Get latest package versions
-        run: | 
+        run: |
           TEMPDIR=$(mktemp -d)
           touch ${TEMPDIR}/package_versions.txt
           docker run --rm \
@@ -140,9 +142,9 @@ jobs:
             ghcr.io/martabal/ubuntu:latest -o table=/tmp/package_versions.txt
           if ! diff ${TEMPDIR}/package_versions.txt package_versions.txt >/dev/null ; then
             cp ${TEMPDIR}/package_versions.txt ./package_versions.txt
-            git config user.name 'github-actions[bot]'
-            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git config user.name 'martabal the bot !'
+            git config user.email '74269598+martabal@users.noreply.github.com'
             git add .
-            git commit -m 'Bot Updating Package Versions'
+            git commit -m 'Updating Package Versions'
             git push
           fi
