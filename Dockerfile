@@ -66,6 +66,7 @@ RUN \
     rustfmt \
     shellcheck \
     software-properties-common \
+    unzip \
     xdg-utils \
     yamllint && \
   echo "**** install bun ****" && \
