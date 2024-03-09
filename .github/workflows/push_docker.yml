@@ -29,7 +29,7 @@ jobs:
       - name: Get latest tag
         id: latesttag
         run: |
-          latestTag=$(curl -sL https://api.github.com/repos/martabal/docker-baseimage-ubuntu/releases/latest | jq -r '.tag_name');
+          latestTag=$(curl -sL https://api.github.com/repos/martabal/docker-baseimage-ubuntu-ci/releases/latest | jq -r '.tag_name');
           echo "latest_tag=$latestTag" >> $GITHUB_ENV
 
       - name: Release tag
@@ -62,8 +62,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            martabal/ubuntu
-            ghcr.io/martabal/ubuntu
+            martabal/ubuntu-ci
+            ghcr.io/martabal/ubuntu-ci
           tags: |
             type=raw,value=latest,enable=true
             type=sha
@@ -119,32 +119,3 @@ jobs:
             "prerelease": false}' \
           https://api.github.com/repos/${{ github.repository_owner }}/${{ github.repository }}/releases
 
-  update_package:
-    runs-on: ubuntu-latest
-    needs: build
-    if: ${{ github.event_name != 'pull_request' }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: "main"
-          fetch-depth: 0
-
-      - name: Get latest package versions
-        run: |
-          TEMPDIR=$(mktemp -d)
-          touch ${TEMPDIR}/package_versions.txt
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            -v ${TEMPDIR}:/tmp \
-            ghcr.io/anchore/syft:latest \
-            ghcr.io/martabal/ubuntu:latest -o table=/tmp/package_versions.txt
-          if ! diff ${TEMPDIR}/package_versions.txt package_versions.txt >/dev/null ; then
-            cp ${TEMPDIR}/package_versions.txt ./package_versions.txt
-            git config user.name 'martabal the bot !'
-            git config user.email '74269598+martabal@users.noreply.github.com'
-            git add .
-            git commit -m 'Updating Package Versions'
-            git push
-          fi
