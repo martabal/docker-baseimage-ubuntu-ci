@@ -1,4 +1,4 @@
-FROM ubuntu:23.04
+FROM ubuntu:24.04
 
 LABEL maintainer="martabal"
 
@@ -22,7 +22,7 @@ RUN \
     gnupg \
     jq \
     libappindicator1 \
-    libasound2 \
+    libasound2t64 \
     libatk1.0-0 \
     libcairo2 \
     libcups2 \
